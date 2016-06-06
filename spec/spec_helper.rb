@@ -3,7 +3,6 @@ require 'restful_resource_bugsnag'
 require 'webmock/rspec'
 require 'bugsnag'
 require 'restful_resource'
-require 'pry'
 
 RSpec.configure do |config|
   config.order = "random"
