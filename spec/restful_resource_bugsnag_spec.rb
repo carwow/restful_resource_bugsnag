@@ -18,6 +18,16 @@ describe RestfulResourceBugsnag do
       it { is_expected.to include("headers" => error.response.headers) }
       it { is_expected.to include("body" => error.response.body) }
     end
+
+    describe 'request tab' do
+      subject(:request_tab) { get_tab(sent_notification, 'request') }
+
+      it { is_expected.to_not be_nil }
+      it { is_expected.to include("method" => error.request.method.to_s) }
+      it { is_expected.to include("url" => error.request.url) }
+      it { is_expected.to include("accept" => error.request.accept) }
+      it { is_expected.to include("body" => error.request.body) }
+    end
   end
 
   it 'has a version number' do
@@ -79,7 +89,10 @@ describe RestfulResourceBugsnag do
       begin
         raise Faraday::ClientError, "The original error"
       rescue Faraday::ClientError => e
-        raise type.new(response)
+        request = RestfulResource::Request.new(:get, "http://example.com",
+                                          body: "The request body",
+                                          accept: "application/vnd.carwow.v2+json")
+        raise type.new(request, response)
       end
     rescue Exception => e
       error = e
