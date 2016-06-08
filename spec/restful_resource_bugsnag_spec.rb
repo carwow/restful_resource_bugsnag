@@ -11,7 +11,7 @@ describe RestfulResourceBugsnag do
     end
 
     describe 'response tab' do
-      subject(:response_tab) { get_tab(sent_notification, 'response') }
+      subject(:response_tab) { get_tab(sent_notification, 'restful_resource_response') }
 
       it { is_expected.to_not be_nil }
       it { is_expected.to include("status" => error.response.status) }
@@ -20,7 +20,7 @@ describe RestfulResourceBugsnag do
     end
 
     describe 'request tab' do
-      subject(:request_tab) { get_tab(sent_notification, 'request') }
+      subject(:request_tab) { get_tab(sent_notification, 'restful_resource_request') }
 
       it { is_expected.to_not be_nil }
       it { is_expected.to include("method" => error.request.method.to_s) }
