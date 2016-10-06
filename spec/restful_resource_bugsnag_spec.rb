@@ -66,12 +66,12 @@ describe RestfulResourceBugsnag do
   describe 'when a notification is sent for an OtherHttpError error' do
     let(:response) do
       {
-        :status => 503,
+        :status => 500,
         :headers => {
           "content-type" => "text/html; charset=utf-8",
           "content-length" => "19"
         },
-        :body => "service unavailable"
+        :body => "Server Error"
       }
     end
 
@@ -80,16 +80,46 @@ describe RestfulResourceBugsnag do
     end
   end
 
+  describe 'when a notification is sent for an ServiceUnavailable error' do
+    let(:response) do
+      {
+        :status => 503,
+        :headers => {
+          "content-type" => "text/html; charset=utf-8",
+          "content-length" => "19"
+        },
+        :body => "Service Unavailable"
+      }
+    end
+
+    it_behaves_like RestfulResourceBugsnag do
+      let(:error) { make_error(RestfulResource::HttpClient::ServiceUnavailable, response) }
+    end
+
+    describe 'grouping ServiceUnavailable errors' do
+      let(:error) { make_error(RestfulResource::HttpClient::ServiceUnavailable, response, url: 'http://example.com/path.json') }
+
+      subject { sent_notification }
+
+      before do
+        Bugsnag.notify(error)
+      end
+
+      it { is_expected.to include("context" => 'HTTP 503: Service unavailable example.com') }
+      it { is_expected.to include("groupingHash" => 'HTTP 503: Service unavailable example.com') }
+    end
+  end
+
   # this is some what convoluted in order to recreate how
   # errors are sent in a real app using RestfulResource
-  def make_error(type, response)
+  def make_error(type, response, url: 'http://example.com')
     error = nil
 
     begin
       begin
         raise Faraday::ClientError, "The original error"
       rescue Faraday::ClientError => e
-        request = RestfulResource::Request.new(:get, "http://example.com",
+        request = RestfulResource::Request.new(:get, url,
                                           body: "The request body",
                                           accept: "application/vnd.carwow.v2+json")
         raise type.new(request, response)

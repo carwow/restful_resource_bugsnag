@@ -1,3 +1,5 @@
+require 'uri'
+
 module RestfulResourceBugsnag
   class Middleware
     def initialize(bugsnag)
@@ -20,7 +22,21 @@ module RestfulResourceBugsnag
           body: exception.request.body
         })
       end
+
+      # Display the request host in the context so its easy to see in Bugsnag which service was unresponsive
+      # Group the errors by host to reduce the amount of error spam
+      if exception.is_a?(RestfulResource::HttpClient::ServiceUnavailable)
+        notification.context = "HTTP 503: Service unavailable #{request_host_from_exception exception}"
+        notification.grouping_hash = notification.context
+      end
+
       @bugsnag.call(notification)
+    end
+
+    private
+
+    def request_host_from_exception(exception)
+      URI.parse(exception.request.url).host
     end
   end
 end
