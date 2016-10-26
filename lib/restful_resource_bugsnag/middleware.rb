@@ -30,6 +30,11 @@ module RestfulResourceBugsnag
         notification.grouping_hash = notification.context
       end
 
+      if exception.is_a?(RestfulResource::HttpClient::ClientError)
+        notification.context = "Client error: Service unavailable #{request_host_from_exception exception}"
+        notification.grouping_hash = notification.context
+      end
+
       @bugsnag.call(notification)
     end
 
