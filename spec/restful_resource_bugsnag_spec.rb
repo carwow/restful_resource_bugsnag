@@ -131,6 +131,27 @@ describe RestfulResourceBugsnag do
     end
   end
 
+  describe 'when a notification is sent for a RestfulResource::HttpClient::Timeout error' do
+    let(:response) { nil }
+
+    it_behaves_like RestfulResourceBugsnag do
+      let(:error) { make_error(RestfulResource::HttpClient::Timeout, response) }
+    end
+
+    describe 'grouping ServiceUnavailable errors' do
+      let(:error) { make_error(RestfulResource::HttpClient::Timeout, response, url: 'http://example.com/path.json') }
+
+      subject { sent_notification }
+
+      before do
+        Bugsnag.notify(error)
+      end
+
+      it { is_expected.to include("context" => 'Client error: Timeout example.com') }
+      it { is_expected.to include("groupingHash" => 'Client error: Timeout example.com') }
+    end
+  end
+
   # this is some what convoluted in order to recreate how
   # errors are sent in a real app using RestfulResource
   def make_error(type, response, url: 'http://example.com')
