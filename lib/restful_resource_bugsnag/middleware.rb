@@ -18,7 +18,6 @@ module RestfulResourceBugsnag
         notification.add_tab(:restful_resource_request, {
           method: exception.request.method,
           url: exception.request.url,
-          accept: exception.request.accept,
           body: exception.request.body
         })
       end

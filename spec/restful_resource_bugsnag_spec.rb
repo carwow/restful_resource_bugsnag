@@ -25,7 +25,6 @@ describe RestfulResourceBugsnag do
       it { is_expected.to_not be_nil }
       it { is_expected.to include("method" => error.request.method.to_s) }
       it { is_expected.to include("url" => error.request.url) }
-      it { is_expected.to include("accept" => error.request.accept) }
       it { is_expected.to include("body" => error.request.body) }
     end
   end
@@ -161,9 +160,7 @@ describe RestfulResourceBugsnag do
       begin
         raise Faraday::ClientError, "The original error"
       rescue Faraday::ClientError => e
-        request = RestfulResource::Request.new(:get, url,
-                                          body: "The request body",
-                                          accept: "application/vnd.carwow.v2+json")
+        request = RestfulResource::Request.new(:get, url, body: "The request body")
         raise type.new(request, response)
       end
     rescue Exception => e
