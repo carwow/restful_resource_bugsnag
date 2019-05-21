@@ -1,0 +1,58 @@
+references:
+  ruby: &ruby
+    image: carwow/ruby-ci:2.6
+
+  defaults: &defaults
+    working_directory: ~/restful_resource_bugsnag
+    docker:
+      - *ruby
+
+version: 2
+jobs:
+  bundle:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - bundle-v2-{{ checksum "Gemfile.lock" }}
+            - bundle-v2-
+      - run: |
+          bundle config --local path vendor/bundle &&
+          bundle check || bundle install --jobs=4 --retry=3
+          bundle clean --force
+      - save_cache:
+          key: bundle-v2-{{ checksum "Gemfile.lock" }}
+          paths: [vendor/bundle]
+
+  tests:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache: { keys: ['bundle-v2-{{ checksum "Gemfile.lock" }}'] }
+      - run: |
+          bundle exec rspec --pattern "**/*_spec.rb" --format "progress"
+
+  deploy:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache: { keys: ['bundle-v2-{{ checksum "Gemfile.lock" }}'] }
+      - run: |
+          git config user.name "CircleCi"
+          git config user.email "developers@carwow.co.uk"
+          bundle exec rake upload
+
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - bundle
+      - tests:
+          requires: [bundle]
+      - deploy:
+          requires: [tests]
+          filters:
+            branches:
+              only: [master]
