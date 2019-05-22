@@ -40,8 +40,3 @@ workflows:
       - bundle
       - tests:
           requires: [bundle]
-      - deploy:
-          requires: [tests]
-          filters:
-            branches:
-              only: [master]
