@@ -7,7 +7,7 @@ module RestfulResourceBugsnag
     end
 
     def call(notification)
-      exception = notification.exceptions.first
+      exception = notification.raw_exceptions.first
 
       if exception.is_a?(RestfulResource::HttpClient::HttpError)
         notification.add_tab(:restful_resource_response, {
@@ -33,7 +33,7 @@ module RestfulResourceBugsnag
         notification.context = "Client error: Service unavailable #{request_host_from_exception exception}"
         notification.grouping_hash = notification.context
       end
-      
+
       if exception.is_a?(RestfulResource::HttpClient::Timeout)
         notification.context = "Client error: Timeout #{request_host_from_exception exception}"
         notification.grouping_hash = notification.context

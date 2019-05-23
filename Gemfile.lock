@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     restful_resource_bugsnag (0.4.1)
-      bugsnag (~> 5)
+      bugsnag (~> 6)
       restful_resource (~> 2)
 
 GEM
@@ -15,7 +15,8 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.6.0)
       public_suffix (>= 2.0.2, < 4.0)
-    bugsnag (5.5.0)
+    bugsnag (6.11.1)
+      concurrent-ruby (~> 1.0)
     concurrent-ruby (1.1.5)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
