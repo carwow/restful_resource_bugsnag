@@ -50,7 +50,7 @@ module RestfulResourceBugsnag
 
     def attempt_json_parse(string)
       JSON.parse(string)
-    rescue JSON::ParserError
+    rescue JSON::ParserError, TypeError
       string
     end
   end

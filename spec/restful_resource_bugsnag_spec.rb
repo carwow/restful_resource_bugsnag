@@ -86,6 +86,13 @@ describe RestfulResourceBugsnag do
         let(:request_body) { 'The request body' }
       end
     end
+
+    context 'message body is nil' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { nil }
+        let(:request_body) { nil }
+      end
+    end
   end
 
   describe 'when a notification is sent for an OtherHttpError error' do
@@ -111,6 +118,13 @@ describe RestfulResourceBugsnag do
         let(:request_body) { 'The request body' }
       end
     end
+
+    context 'message body is nil' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { nil }
+        let(:request_body) { nil }
+      end
+    end
   end
 
   describe 'when a notification is sent for an ServiceUnavailable error' do
@@ -134,6 +148,13 @@ describe RestfulResourceBugsnag do
       it_behaves_like 'passes unparsed body to bugsnag' do
         let(:response_body) { 'Service Unavailable' }
         let(:request_body) { 'The request body' }
+      end
+    end
+
+    context 'message body is nil' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { nil }
+        let(:request_body) { nil }
       end
     end
 
