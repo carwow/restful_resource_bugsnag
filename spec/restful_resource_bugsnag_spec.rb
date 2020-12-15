@@ -16,7 +16,7 @@ describe RestfulResourceBugsnag do
       it { is_expected.to_not be_nil }
       it { is_expected.to include("status" => error.response.status) }
       it { is_expected.to include("headers" => error.response.headers) }
-      it { is_expected.to include("body" => error.response.body) }
+      it { is_expected.to include("body" => JSON.parse(error.response.body)) }
     end
 
     describe 'request tab' do
@@ -25,6 +25,24 @@ describe RestfulResourceBugsnag do
       it { is_expected.to_not be_nil }
       it { is_expected.to include("method" => error.request.method.to_s) }
       it { is_expected.to include("url" => error.request.url) }
+      it { is_expected.to include("body" => JSON.parse(error.request.body)) }
+    end
+  end
+
+  shared_examples 'passes unparsed body to bugsnag' do
+    before do
+      Bugsnag.notify(error)
+    end
+
+    describe 'response tab' do
+      subject(:response_tab) { get_tab(sent_notification, 'restful_resource_response') }
+
+      it { is_expected.to include("body" => error.response.body) }
+    end
+
+    describe 'request tab' do
+      subject(:request_tab) { get_tab(sent_notification, 'restful_resource_request') }
+
       it { is_expected.to include("body" => error.request.body) }
     end
   end
@@ -46,6 +64,8 @@ describe RestfulResourceBugsnag do
   end
 
   describe 'when a notification is sent for an UnprocessableEntity error' do
+    let(:request_body) { '{"msg": "The request body"}' }
+    let(:response_body) { '{"msg": "a body"}' }
     let(:response) do
       {
         :status => 422,
@@ -53,16 +73,31 @@ describe RestfulResourceBugsnag do
           "content-type" => "text/html; charset=utf-8",
           "content-length" => "6"
         },
-        :body => "a body"
+        :body => response_body
       }
     end
+    let(:error) { make_error(RestfulResource::HttpClient::UnprocessableEntity, response, request_body: request_body) }
 
-    it_behaves_like RestfulResourceBugsnag do
-      let(:error) { make_error(RestfulResource::HttpClient::UnprocessableEntity, response) }
+    it_behaves_like RestfulResourceBugsnag
+
+    context 'message body is not valid JSON' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { 'a body' }
+        let(:request_body) { 'The request body' }
+      end
+    end
+
+    context 'message body is nil' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { nil }
+        let(:request_body) { nil }
+      end
     end
   end
 
   describe 'when a notification is sent for an OtherHttpError error' do
+    let(:request_body) { '{"msg": "The request body"}' }
+    let(:response_body) { '{"msg": "Server Error"}' }
     let(:response) do
       {
         :status => 500,
@@ -70,16 +105,31 @@ describe RestfulResourceBugsnag do
           "content-type" => "text/html; charset=utf-8",
           "content-length" => "19"
         },
-        :body => "Server Error"
+        :body => response_body
       }
     end
+    let(:error) { make_error(RestfulResource::HttpClient::OtherHttpError, response, request_body: request_body) }
 
-    it_behaves_like RestfulResourceBugsnag do
-      let(:error) { make_error(RestfulResource::HttpClient::OtherHttpError, response) }
+    it_behaves_like RestfulResourceBugsnag
+
+    context 'message body is not valid JSON' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { 'Server Error' }
+        let(:request_body) { 'The request body' }
+      end
+    end
+
+    context 'message body is nil' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { nil }
+        let(:request_body) { nil }
+      end
     end
   end
 
   describe 'when a notification is sent for an ServiceUnavailable error' do
+    let(:request_body) { '{"msg": "The request body"}' }
+    let(:response_body) { '{"msg": "Service Unavailable"}' }
     let(:response) do
       {
         :status => 503,
@@ -87,12 +137,25 @@ describe RestfulResourceBugsnag do
           "content-type" => "text/html; charset=utf-8",
           "content-length" => "19"
         },
-        :body => "Service Unavailable"
+        :body => response_body
       }
     end
+    let(:error) { make_error(RestfulResource::HttpClient::ServiceUnavailable, response, request_body: request_body) }
 
-    it_behaves_like RestfulResourceBugsnag do
-      let(:error) { make_error(RestfulResource::HttpClient::ServiceUnavailable, response) }
+    it_behaves_like RestfulResourceBugsnag
+
+    context 'message body is not valid JSON' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { 'Service Unavailable' }
+        let(:request_body) { 'The request body' }
+      end
+    end
+
+    context 'message body is nil' do
+      it_behaves_like 'passes unparsed body to bugsnag' do
+        let(:response_body) { nil }
+        let(:request_body) { nil }
+      end
     end
 
     describe 'grouping ServiceUnavailable errors' do
@@ -153,14 +216,14 @@ describe RestfulResourceBugsnag do
 
   # this is some what convoluted in order to recreate how
   # errors are sent in a real app using RestfulResource
-  def make_error(type, response, url: 'http://example.com')
+  def make_error(type, response, url: 'http://example.com', request_body: '{"msg": "The request body"}')
     error = nil
 
     begin
       begin
         raise Faraday::ClientError, "The original error"
       rescue Faraday::ClientError => e
-        request = RestfulResource::Request.new(:get, url, body: "The request body")
+        request = RestfulResource::Request.new(:get, url, body: request_body)
         raise type.new(request, response)
       end
     rescue Exception => e
