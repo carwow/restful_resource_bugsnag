@@ -12,13 +12,13 @@ module RestfulResourceBugsnag
       if exception.is_a?(RestfulResource::HttpClient::HttpError)
         notification.add_tab(:restful_resource_response, {
           status: exception.response.status,
-          body: exception.response.body,
+          body: attempt_json_parse(exception.response.body),
           headers: exception.response.headers
         })
         notification.add_tab(:restful_resource_request, {
           method: exception.request.method,
           url: exception.request.url,
-          body: exception.request.body
+          body: attempt_json_parse(exception.request.body)
         })
       end
 
@@ -46,6 +46,12 @@ module RestfulResourceBugsnag
 
     def request_host_from_exception(exception)
       URI.parse(exception.request.url).host
+    end
+
+    def attempt_json_parse(string)
+      JSON.parse(string)
+    rescue JSON::ParserError
+      string
     end
   end
 end
