@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    restful_resource_bugsnag (0.5.0)
+    restful_resource_bugsnag (0.5.1)
       bugsnag (~> 6)
       restful_resource (~> 2)
 
