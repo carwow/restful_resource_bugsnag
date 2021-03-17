@@ -55,8 +55,9 @@ describe RestfulResourceBugsnag do
     describe 'response tab' do
       subject(:response_tab) { get_tab(sent_notification, 'restful_resource_response') }
 
-      it 'replaces an email with a redaction' do
-        expect(subject['body']).to include('Message with email: <email-address-redacted>')
+      it 'replaces an email with a redaction without comprimising the structure of the JSON' do
+        expect(subject['body']).to have_key("msg")
+        expect(subject['body']['msg']).to include('<email-address-redacted>')
       end
     end
   end
@@ -108,10 +109,15 @@ describe RestfulResourceBugsnag do
       end
     end
 
-    context 'message body contains an email address' do
+    context 'message body contains an email address anywhere in the response' do
       it_behaves_like 'redacts emails from body before passing to bugsnag' do
         let(:request_body) { '{"msg": "The request body"}' }
         let(:response_body) { '{"msg": "Message with email: jane@doe.com"}' }
+      end
+
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "jane@doe.com email in message"}' }
       end
     end
   end
@@ -147,10 +153,15 @@ describe RestfulResourceBugsnag do
       end
     end
 
-    context 'message body contains an email address' do
+    context 'message body contains an email address anywhere in the response' do
       it_behaves_like 'redacts emails from body before passing to bugsnag' do
         let(:request_body) { '{"msg": "The request body"}' }
         let(:response_body) { '{"msg": "Message with email: jane@doe.com"}' }
+      end
+
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "jane@doe.com email in message"}' }
       end
     end
   end
@@ -186,10 +197,15 @@ describe RestfulResourceBugsnag do
       end
     end
 
-    context 'message body contains an email address' do
+    context 'message body contains an email address anywhere in the response' do
       it_behaves_like 'redacts emails from body before passing to bugsnag' do
         let(:request_body) { '{"msg": "The request body"}' }
         let(:response_body) { '{"msg": "Message with email: jane@doe.com"}' }
+      end
+
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "jane@doe.com email in message"}' }
       end
     end
 

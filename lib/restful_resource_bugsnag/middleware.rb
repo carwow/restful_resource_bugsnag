@@ -57,7 +57,7 @@ module RestfulResourceBugsnag
 
     def redact_user_emails_from_errors(string)
       # Based on Devise.email_regexp
-      string&.gsub(/[^@\s]+@[^@\s]+/, '<email-address-redacted>')
+      string&.gsub(/[^@"\s]+@[^@"\s]+/, '<email-address-redacted>')
     end
   end
 end
