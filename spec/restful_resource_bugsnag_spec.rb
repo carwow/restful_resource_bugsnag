@@ -47,6 +47,21 @@ describe RestfulResourceBugsnag do
     end
   end
 
+  shared_examples 'redacts emails from body before passing to bugsnag' do
+    before do
+      Bugsnag.notify(error)
+    end
+
+    describe 'response tab' do
+      subject(:response_tab) { get_tab(sent_notification, 'restful_resource_response') }
+
+      it 'replaces an email with a redaction without comprimising the structure of the JSON' do
+        expect(subject['body']).to have_key("msg")
+        expect(subject['body']['msg']).to include('<email-address-redacted>')
+      end
+    end
+  end
+
   it 'has a version number' do
     expect(RestfulResourceBugsnag::VERSION).not_to be nil
   end
@@ -93,6 +108,18 @@ describe RestfulResourceBugsnag do
         let(:request_body) { nil }
       end
     end
+
+    context 'message body contains an email address anywhere in the response' do
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "Message with email: jane@doe.com"}' }
+      end
+
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "jane@doe.com email in message"}' }
+      end
+    end
   end
 
   describe 'when a notification is sent for an OtherHttpError error' do
@@ -125,6 +152,18 @@ describe RestfulResourceBugsnag do
         let(:request_body) { nil }
       end
     end
+
+    context 'message body contains an email address anywhere in the response' do
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "Message with email: jane@doe.com"}' }
+      end
+
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "jane@doe.com email in message"}' }
+      end
+    end
   end
 
   describe 'when a notification is sent for an ServiceUnavailable error' do
@@ -155,6 +194,18 @@ describe RestfulResourceBugsnag do
       it_behaves_like 'passes unparsed body to bugsnag' do
         let(:response_body) { nil }
         let(:request_body) { nil }
+      end
+    end
+
+    context 'message body contains an email address anywhere in the response' do
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "Message with email: jane@doe.com"}' }
+      end
+
+      it_behaves_like 'redacts emails from body before passing to bugsnag' do
+        let(:request_body) { '{"msg": "The request body"}' }
+        let(:response_body) { '{"msg": "jane@doe.com email in message"}' }
       end
     end
 

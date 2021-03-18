@@ -49,9 +49,15 @@ module RestfulResourceBugsnag
     end
 
     def attempt_json_parse(string)
-      JSON.parse(string)
+      redacted_string = redact_user_emails_from_errors(string)
+      JSON.parse(redacted_string)
     rescue JSON::ParserError, TypeError
-      string
+      redacted_string
+    end
+
+    def redact_user_emails_from_errors(string)
+      # Based on Devise.email_regexp
+      string&.gsub(/[^@"\s]+@[^@"\s]+/, '<email-address-redacted>')
     end
   end
 end
