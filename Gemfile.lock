@@ -74,6 +74,7 @@ GEM
       link_header
       rack (~> 2.2)
       typhoeus (~> 1.4)
+    rexml (3.2.6)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -105,6 +106,7 @@ DEPENDENCIES
   bundler
   rake
   restful_resource_bugsnag!
+  rexml
   rspec
   webmock
 
