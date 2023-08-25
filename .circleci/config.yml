@@ -1,6 +1,8 @@
 references:
   ruby: &ruby
-    image: carwow/ruby-ci:2.6
+    image: carwow/ruby-ci:3.1
+    environment:
+      RUBYOPT: -w # Enable warnings, to expose deprecations
 
   defaults: &defaults
     working_directory: ~/restful_resource_bugsnag
