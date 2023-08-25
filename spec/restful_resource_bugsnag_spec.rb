@@ -14,18 +14,18 @@ describe RestfulResourceBugsnag do
       subject(:response_tab) { get_tab(sent_notification, 'restful_resource_response') }
 
       it { is_expected.to_not be_nil }
-      it { is_expected.to include("status" => error.response.status) }
-      it { is_expected.to include("headers" => error.response.headers) }
-      it { is_expected.to include("body" => JSON.parse(error.response.body)) }
+      it { expect(subject['status']).to eq(error.response.status) }
+      it { expect(subject['headers']).to eq(error.response.headers) }
+      it { expect(subject['body']).to eq(JSON.parse(error.response.body)) }
     end
 
     describe 'request tab' do
       subject(:request_tab) { get_tab(sent_notification, 'restful_resource_request') }
 
       it { is_expected.to_not be_nil }
-      it { is_expected.to include("method" => error.request.method.to_s) }
-      it { is_expected.to include("url" => error.request.url) }
-      it { is_expected.to include("body" => JSON.parse(error.request.body)) }
+      it { expect(subject['method']).to eq(error.request.method.to_s) }
+      it { expect(subject['url']).to eq(error.request.url) }
+      it { expect(subject['body']).to eq(JSON.parse(error.request.body)) }
     end
   end
 
@@ -37,13 +37,13 @@ describe RestfulResourceBugsnag do
     describe 'response tab' do
       subject(:response_tab) { get_tab(sent_notification, 'restful_resource_response') }
 
-      it { is_expected.to include("body" => error.response.body) }
+      it { expect(subject['body']).to eq(error.response.body) }
     end
 
     describe 'request tab' do
       subject(:request_tab) { get_tab(sent_notification, 'restful_resource_request') }
 
-      it { is_expected.to include("body" => error.request.body) }
+      it { expect(subject['body']).to eq(error.request.body) }
     end
   end
 
@@ -265,7 +265,7 @@ describe RestfulResourceBugsnag do
     end
   end
 
-  # this is some what convoluted in order to recreate how
+  # this is somewhat convoluted in order to recreate how
   # errors are sent in a real app using RestfulResource
   def make_error(type, response, url: 'http://example.com', request_body: '{"msg": "The request body"}')
     error = nil
